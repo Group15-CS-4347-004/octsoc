@@ -29,7 +29,7 @@ app.get('/api/customers', async (req, res) => {
     const [rows] = await dbPromise.query('SELECT * FROM customers');
     res.json(rows);
   } catch (err) {
-    console.error('Error fetching customers:', err);
+    console.error('Error getting customers:', err);
     res.status(500).json({ error: 'Failed to fetch customers' });
   }
 });
