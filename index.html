@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Oct-Soc Membership System</title>
+</head>
+<body>
+
+  <h1>Oct-Soc Warehouse System</h1>
+
+  <!-- Customers Section -->
+  <section id="customers">
+    <h2>Customers</h2>
+    <!-- Button to fetch and display all customers -->
+    <button id="loadCustomers">Load Customers</button>
+    <ul id="customerList"><!-- Customer list will be injected here --></ul>
+
+    <h3>Add Customer</h3>
+    <form id="customerForm">
+      Name: <input type="text" name="name" required />
+      Membership Level: <input type="text" name="membership_level" required />
+      <button type="submit">Add Customer</button>
+    </form>
+  </section>
+
+  <!-- Products Section -->
+  <section id="products">
+    <h2>Products</h2>
+    <!-- Button to fetch and display all products -->
+    <button id="loadProducts">Load Products</button>
+    <ul id="productList"><!-- Product list will be injected here --></ul>
+
+    <h3>Add Product</h3>
+    <form id="productForm">
+      Name: <input type="text" name="name" required />
+      Price: <input type="number" step="0.01" name="price" required />
+      Dept ID: <input type="number" name="department_id" required />
+      <button type="submit">Add Product</button>
+    </form>
+  </section>
+
+  <script src="script.js"></script>
+</body>
+</html>
+
