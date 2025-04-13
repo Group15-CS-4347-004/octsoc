@@ -1,0 +1,40 @@
+name: Deploy Website
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    # Only deploy if the repository owner and branch are as expected.
+    if: github.ref == 'refs/heads/main'
+        && github.repository_owner == 'Group15-CS-4347-004'
+        && github.event_name == 'push'
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+      
+      - name: Install dependencies
+        run: npm install
+
+      # - name: Build the site
+      #   run: npm run build
+
+      - name: Deploy static website to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+
