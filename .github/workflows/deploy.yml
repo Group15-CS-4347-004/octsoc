@@ -3,13 +3,12 @@ name: Deploy Website
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    # Only deploy if the repository owner and branch are as expected.
     if: github.ref == 'refs/heads/main'
         && github.repository_owner == 'Group15-CS-4347-004'
         && github.event_name == 'push'
