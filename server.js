@@ -6,12 +6,10 @@ const mysql   = require('mysql2');
 
 const app = express();
 
-// Allow only your GH‑Pages origin
 app.use(cors({ origin: 'https://group15-cs-4347-004.github.io' }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Connect to MariaDB
 const db = mysql.createConnection({
   host:     process.env.DB_HOST,
   user:     process.env.DB_USER,

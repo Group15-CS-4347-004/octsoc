@@ -1,4 +1,3 @@
-// verify-db.js
 require('dotenv').config();            // loads DB_HOST, DB_USER, etc.
 const mysql = require('mysql2/promise');
 
