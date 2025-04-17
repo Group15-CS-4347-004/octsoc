@@ -1,14 +1,13 @@
 // script.js – Client-side JavaScript to interact with the API
 
-// When the "Load Customers" button is clicked, fetch the customer list from the backend
 document.getElementById('loadCustomers').addEventListener('click', () => {
-  fetch('/api/customers')               // GET request to our backend API
+  fetch('/api/customer')               // GET request to our backend API
     .then(response => response.json())  // Parse JSON from response
-    .then(customers => {
+    .then(customer => {
       const listEl = document.getElementById('customerList');
       listEl.innerHTML = '';            // Clear current list
       // Populate the list with customer data
-      customers.forEach(cust => {
+      customer.forEach(cust => {
         const item = document.createElement('li');
         item.textContent = `${cust.customer_id}: ${cust.name} (${cust.membership_level})`;
         listEl.appendChild(item);
@@ -19,7 +18,6 @@ document.getElementById('loadCustomers').addEventListener('click', () => {
     });
 });
 
-// Handle the "Add Customer" form submission
 document.getElementById('customerForm').addEventListener('submit', event => {
   event.preventDefault();  // Prevent the default form submission (page reload)
   const form = event.target;
@@ -29,7 +27,7 @@ document.getElementById('customerForm').addEventListener('submit', event => {
     membership_level: form.membership_level.value
   };
   // Send a POST request with JSON body
-  fetch('/api/customers', {
+  fetch('/api/customer', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(newCustomer)
@@ -45,14 +43,13 @@ document.getElementById('customerForm').addEventListener('submit', event => {
     });
 });
 
-// Similar logic for Products:
 document.getElementById('loadProducts').addEventListener('click', () => {
-  fetch('/api/products')
+  fetch('/api/product')
     .then(res => res.json())
-    .then(products => {
+    .then(product => {
       const listEl = document.getElementById('productList');
       listEl.innerHTML = '';
-      products.forEach(prod => {
+      product.forEach(prod => {
         const item = document.createElement('li');
         item.textContent = `${prod.product_id}: ${prod.name} ($${prod.price}) [Dept ${prod.department_id}]`;
         listEl.appendChild(item);
@@ -69,7 +66,7 @@ document.getElementById('productForm').addEventListener('submit', event => {
     price: parseFloat(form.price.value),
     department_id: parseInt(form.department_id.value)
   };
-  fetch('/api/products', {
+  fetch('/api/product', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(newProduct)
