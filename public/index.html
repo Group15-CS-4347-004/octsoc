@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Oct-Soc Warehouse System</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -10,19 +10,12 @@
       darkMode: 'class',
       theme: {
         extend: {
-          fontFamily: {
-            display: ['Poppins', 'sans-serif'],
-          },
+          fontFamily: { display: ['Poppins','sans-serif'] },
           backgroundImage: {
             'mesh': "url('https://www.transparenttextures.com/patterns/cubes.png')"
           },
-          colors: {
-            primary: '#1D4ED8',
-            accent: '#10B981'
-          },
-          boxShadow: {
-            glow: '0 0 20px rgba(59,130,246,0.3)',
-          },
+          colors: { primary: '#1D4ED8', accent: '#10B981' },
+          boxShadow: { glow: '0 0 20px rgba(59,130,246,0.3)' },
           animation: {
             fade: 'fadeIn 0.5s ease-out forwards',
             zoom: 'zoomIn 0.5s ease'
@@ -43,69 +36,102 @@
   </script>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600;800&display=swap" rel="stylesheet">
   <style>
-    .toggle-switch {
-      @apply relative inline-flex h-6 w-11 items-center rounded-full bg-gray-300 dark:bg-gray-700 transition;
-    }
-    .toggle-switch input {
-      @apply sr-only;
-    }
-    .toggle-slider {
-      @apply inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-1;
-    }
-    input:checked + .toggle-slider {
-      @apply translate-x-6;
-    }
+    .toggle-switch { @apply relative inline-flex h-6 w-11 items-center rounded-full bg-gray-300 dark:bg-gray-700 transition; }
+    .toggle-switch input { @apply sr-only; }
+    .toggle-slider { @apply inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-1; }
+    input:checked + .toggle-slider { @apply translate-x-6; }
   </style>
 </head>
 <body class="bg-mesh bg-fixed min-h-screen font-display text-gray-800 dark:text-gray-200 dark:bg-gray-900 flex items-center justify-center p-6">
   <div class="absolute top-4 right-4 z-10 flex items-center gap-2">
     <label for="modeToggle" class="text-sm font-medium">🌞/🌙</label>
     <label class="toggle-switch">
-      <input type="checkbox" id="modeToggle" onclick="document.documentElement.classList.toggle('dark')">
+      <input type="checkbox" id="modeToggle" onclick="document.documentElement.classList.toggle('dark')" />
       <span class="toggle-slider"></span>
     </label>
   </div>
 
   <div class="w-full max-w-6xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl shadow-2xl rounded-3xl p-10 space-y-16 animate-fade">
-    <h1 class="text-6xl font-extrabold text-center text-primary tracking-tight animate-zoom drop-shadow-md">🛒 Oct-Soc Warehouse System</h1>
 
+    <h1 class="text-6xl font-extrabold text-center text-primary tracking-tight animate-zoom drop-shadow-md">
+      🛒 Oct-Soc Warehouse System
+    </h1>
+
+    <!-- CUSTOMERS -->
     <section class="space-y-6 animate-fade">
-      <h2 class="text-3xl font-bold flex items-center gap-3 text-gray-900 dark:text-white">📋 Customers</h2>
-      <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
-        <button onclick="loadCustomers()" class="bg-primary hover:bg-blue-700 text-white text-sm font-semibold py-2 px-6 rounded-lg transition shadow-md">Load Customers</button>
+      <h2 class="text-3xl font-bold flex items-center gap-3 text-gray-900 dark:text-white">
+        📋 Customers
+      </h2>
+      <div class="flex justify-start">
+        <button id="loadCustomers"
+                class="bg-primary hover:bg-blue-700 text-white text-sm font-semibold py-2 px-6 rounded-lg shadow-md transition">
+          Load Customers
+        </button>
       </div>
+
       <div class="bg-white dark:bg-gray-700 p-6 rounded-xl border border-blue-100 shadow-glow">
         <h3 class="text-xl font-semibold text-primary mb-4">Add Customer</h3>
-        <form onsubmit="addCustomer(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-5">
-          <input type="text" id="customerName" placeholder="Name" class="p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" required />
-          <input type="text" id="membershipLevel" placeholder="Membership Level" class="p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" required />
-          <button type="submit" class="bg-accent hover:bg-green-700 text-white py-3 px-4 rounded-lg font-semibold shadow transition">Add Customer</button>
+        <form id="customerForm" class="grid grid-cols-1 sm:grid-cols-4 gap-5">
+          <input type="text" name="first_name" placeholder="First Name"
+                 class="p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary" required/>
+          <input type="text" name="middle_initial" placeholder="Middle Initial"
+                 class="p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary"/>
+          <input type="text" name="last_name" placeholder="Last Name"
+                 class="p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary" required/>
+          <input type="text" name="membership_type" placeholder="Membership Type"
+                 class="p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary"/>
+          <button type="submit" 
+                  class="bg-accent hover:bg-green-700 text-white py-3 px-4 rounded-lg font-semibold shadow transition">
+            Add Customer
+          </button>
         </form>
       </div>
+
       <div id="customerList" class="mt-6 space-y-3 text-base"></div>
     </section>
 
+    <!-- PRODUCTS -->
     <section class="space-y-6 animate-fade">
-      <h2 class="text-3xl font-bold flex items-center gap-3 text-gray-900 dark:text-white">📦 Products</h2>
-      <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
-        <button onclick="loadProducts()" class="bg-primary hover:bg-blue-700 text-white text-sm font-semibold py-2 px-6 rounded-lg transition shadow-md">Load Products</button>
+      <h2 class="text-3xl font-bold flex items-center gap-3 text-gray-900 dark:text-white">
+        📦 Products
+      </h2>
+      <div class="flex justify-start">
+        <button id="loadProducts"
+                class="bg-primary hover:bg-blue-700 text-white text-sm font-semibold py-2 px-6 rounded-lg shadow-md transition">
+          Load Products
+        </button>
       </div>
+
       <div class="bg-white dark:bg-gray-700 p-6 rounded-xl border border-blue-100 shadow-glow">
         <h3 class="text-xl font-semibold text-primary mb-4">Add Product</h3>
-        <form onsubmit="addProduct(event)" class="grid grid-cols-1 sm:grid-cols-5 gap-5">
-          <input type="text" id="productName" placeholder="Product Name" class="p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" required />
-          <input type="number" id="price" step="0.01" placeholder="Price" class="p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" required />
-          <input type="number" id="deptId" placeholder="Dept #" class="p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" required />
-          <input type="number" id="storeId" placeholder="Store #" class="p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" required />
-          <button type="submit" class="bg-accent hover:bg-green-700 text-white py-3 px-4 rounded-lg font-semibold shadow transition">Add Product</button>
+        <form id="productForm" class="grid grid-cols-1 sm:grid-cols-5 gap-5">
+          <input type="text" name="name" placeholder="Name"
+                 class="p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary" required/>
+          <input type="number" name="msrp" step="0.01" placeholder="MSRP"
+                 class="p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary" required/>
+          <input type="date" name="sell_by_date" placeholder="Sell By Date"
+                 class="p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary"/>
+          <input type="number" name="supplier_id" placeholder="Supplier ID"
+                 class="p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary" required/>
+          <input type="number" name="department_number" placeholder="Dept #"
+                 class="p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary" required/>
+          <button type="submit"
+                  class="bg-accent hover:bg-green-700 text-white py-3 px-4 rounded-lg font-semibold shadow transition">
+            Add Product
+          </button>
         </form>
       </div>
+
       <div id="productList" class="mt-6 space-y-3 text-base"></div>
     </section>
+
   </div>
+
   <footer class="fixed bottom-2 w-full text-center text-xs text-gray-500 dark:text-gray-400">
     <p>© 2025 By: Lalima Karri</p>
   </footer>
+
+  <script src="script.js"></script>
 </body>
 </html>
 
