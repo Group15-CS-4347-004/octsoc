@@ -24,21 +24,21 @@ db.connect(err => {
 
 const dbPromise = db.promise();
 
-app.get('/api/customers', async (req, res) => {
+app.get('/api/customer', async (req, res) => {
   try {
-    const [rows] = await dbPromise.query('SELECT * FROM customers');
+    const [rows] = await dbPromise.query('SELECT * FROM customer');
     res.json(rows);
   } catch (err) {
-    console.error('Error getting customers:', err);
-    res.status(500).json({ error: 'Failed to fetch customers' });
+    console.error('Error getting customer:', err);
+    res.status(500).json({ error: 'Failed to fetch customer' });
   }
 });
 
-app.post('/api/customers', async (req, res) => {
+app.post('/api/customer', async (req, res) => {
   try {
     const { name, membership_level } = req.body;
     const [result] = await dbPromise.query(
-      'INSERT INTO customers (name, membership_level) VALUES (?, ?)',
+      'INSERT INTO customer (name, membership_level) VALUES (?, ?)',
       [name, membership_level]
     );
     res.status(201).json({ customer_id: result.insertId, name, membership_level });
@@ -48,17 +48,17 @@ app.post('/api/customers', async (req, res) => {
   }
 });
 
-app.get('/api/products', async (req, res) => {
+app.get('/api/product', async (req, res) => {
   try {
-    const [rows] = await dbPromise.query('SELECT * FROM products');
+    const [rows] = await dbPromise.query('SELECT * FROM product');
     res.json(rows);
   } catch (err) {
-    console.error('Error fetching products:', err);
-    res.status(500).json({ error: 'Failed to fetch products' });
+    console.error('Error fetching product:', err);
+    res.status(500).json({ error: 'Failed to fetch product' });
   }
 });
 
-app.post('/api/products', async (req, res) => {
+app.post('/api/product', async (req, res) => {
   try {
     const { name, price, department_id } = req.body;
     const [result] = await dbPromise.query(
