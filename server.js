@@ -1,79 +1,131 @@
+require('dotenv').config();
 const express = require('express');
+const cors    = require('cors');
+const path    = require('path');
+const mysql   = require('mysql2');
+
 const app = express();
-const path = require('path');
-const mysql = require('mysql2');
 
+// Allow only your GH‑Pages origin
+app.use(cors({ origin: 'https://group15-cs-4347-004.github.io' }));
 app.use(express.json());
-
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Connect to MariaDB
 const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'octuser',
-  password: 'octpassword',
-  database: 'octsoc'
+  host:     process.env.DB_HOST,
+  user:     process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
+  port:     process.env.DB_PORT,
 });
-
 db.connect(err => {
   if (err) {
-    console.error('Error connecting to database:', err.message);
-  } else {
-    console.log('Connected to MariaDB database');
+    console.error('DB connect error:', err.message);
+    process.exit(1);
   }
+  console.log('Connected to MariaDB');
 });
+const dbp = db.promise();
 
-const dbPromise = db.promise();
-
-app.get('/api/customers', async (req, res) => {
+// ——— CUSTOMER ———
+app.get('/api/customer', async (_, res) => {
   try {
-    const [rows] = await dbPromise.query('SELECT * FROM customers');
-    res.json(rows);
-  } catch (err) {
-    console.error('Error getting customers:', err);
-    res.status(500).json({ error: 'Failed to fetch customers' });
-  }
-});
-
-app.post('/api/customers', async (req, res) => {
-  try {
-    const { name, membership_level } = req.body;
-    const [result] = await dbPromise.query(
-      'INSERT INTO customers (name, membership_level) VALUES (?, ?)',
-      [name, membership_level]
+    const [rows] = await dbp.query(
+      `SELECT
+         membership_id,
+         first_name,
+         middle_initial,
+         last_name,
+         membership_type
+       FROM customer`
     );
-    res.status(201).json({ customer_id: result.insertId, name, membership_level });
-  } catch (err) {
-    console.error('Error adding customer:', err);
+    res.json(rows);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Failed to fetch customer list' });
+  }
+});
+
+app.post('/api/customer', async (req, res) => {
+  const {
+    first_name,
+    middle_initial = null,
+    last_name,
+    membership_type = null
+  } = req.body;
+  try {
+    const [result] = await dbp.query(
+      `INSERT INTO customer
+         (first_name, middle_initial, last_name, membership_type)
+       VALUES (?, ?, ?, ?)`,
+      [first_name, middle_initial, last_name, membership_type]
+    );
+    res.status(201).json({
+      membership_id:    result.insertId,
+      first_name,
+      middle_initial,
+      last_name,
+      membership_type
+    });
+  } catch (e) {
+    console.error(e);
     res.status(500).json({ error: 'Failed to add customer' });
   }
 });
 
-app.get('/api/products', async (req, res) => {
+// ——— PRODUCT ———
+app.get('/api/product', async (_, res) => {
   try {
-    const [rows] = await dbPromise.query('SELECT * FROM products');
+    const [rows] = await dbp.query(
+      `SELECT
+         product_id,
+         name,
+         msrp,
+         sell_by_date,
+         supplier_id,
+         department_number
+       FROM product`
+    );
     res.json(rows);
-  } catch (err) {
-    console.error('Error fetching products:', err);
-    res.status(500).json({ error: 'Failed to fetch products' });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Failed to fetch product list' });
   }
 });
 
-app.post('/api/products', async (req, res) => {
+app.post('/api/product', async (req, res) => {
+  const {
+    name,
+    msrp,
+    sell_by_date = null,
+    supplier_id,
+    department_number
+  } = req.body;
   try {
-    const { name, price, department_id } = req.body;
-    const [result] = await dbPromise.query(
-      'INSERT INTO products (name, price, department_id) VALUES (?, ?, ?)',
-      [name, price, department_id]
+    const [result] = await dbp.query(
+      `INSERT INTO product
+         (name, msrp, sell_by_date, supplier_id, department_number)
+       VALUES (?, ?, ?, ?, ?)`,
+      [name, msrp, sell_by_date, supplier_id, department_number]
     );
-    res.status(201).json({ product_id: result.insertId, name, price, department_id });
-  } catch (err) {
-    console.error('Error adding product:', err);
+    res.status(201).json({
+      product_id:        result.insertId,
+      name,
+      msrp,
+      sell_by_date,
+      supplier_id,
+      department_number
+    });
+  } catch (e) {
+    console.error(e);
     res.status(500).json({ error: 'Failed to add product' });
   }
 });
 
-const PORT = 3000;
+// ——— START SERVER ———
+const PORT = process.env.PORT;
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`API listening on http://localhost:${PORT}`);
 });
 

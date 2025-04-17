@@ -1,85 +1,85 @@
-// script.js – Client-side JavaScript to interact with the API
+const API_ROOT = 'https://octsoc.diejor.tech';
 
-// When the "Load Customers" button is clicked, fetch the customer list from the backend
+// ——— CUSTOMER ———
 document.getElementById('loadCustomers').addEventListener('click', () => {
-  fetch('/api/customers')               // GET request to our backend API
-    .then(response => response.json())  // Parse JSON from response
-    .then(customers => {
-      const listEl = document.getElementById('customerList');
-      listEl.innerHTML = '';            // Clear current list
-      // Populate the list with customer data
-      customers.forEach(cust => {
-        const item = document.createElement('li');
-        item.textContent = `${cust.customer_id}: ${cust.name} (${cust.membership_level})`;
-        listEl.appendChild(item);
+  fetch(`${API_ROOT}/api/customer`)
+    .then(r => r.json())
+    .then(list => {
+      const ul = document.getElementById('customerList');
+      ul.innerHTML = '';
+      list.forEach(c => {
+        const mi = c.middle_initial ? ` ${c.middle_initial}.` : '';
+        const li = document.createElement('li');
+        li.textContent = 
+          `${c.membership_id}: ${c.first_name}${mi} ${c.last_name}` +
+          ` [${c.membership_type || 'N/A'}]`;
+        ul.appendChild(li);
       });
     })
-    .catch(err => {
-      console.error('Error loading customers:', err);
-    });
+    .catch(console.error);
 });
 
-// Handle the "Add Customer" form submission
-document.getElementById('customerForm').addEventListener('submit', event => {
-  event.preventDefault();  // Prevent the default form submission (page reload)
-  const form = event.target;
-  // Collect form data into an object
-  const newCustomer = {
-    name: form.name.value,
-    membership_level: form.membership_level.value
+document.getElementById('customerForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const f = e.target;
+  const body = {
+    first_name:      f.first_name.value,
+    middle_initial:  f.middle_initial.value || null,
+    last_name:       f.last_name.value,
+    membership_type: f.membership_type.value || null,
   };
-  // Send a POST request with JSON body
-  fetch('/api/customers', {
-    method: 'POST',
+  fetch(`${API_ROOT}/api/customer`, {
+    method:  'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(newCustomer)
+    body:    JSON.stringify(body),
   })
-    .then(response => response.json())
-    .then(createdCust => {
-      console.log('Customer added:', createdCust);
-      form.reset();             // Clear the form fields
-      document.getElementById('loadCustomers').click();  // Refresh the list
+    .then(r => r.json())
+    .then(() => {
+      f.reset();
+      document.getElementById('loadCustomers').click();
     })
-    .catch(err => {
-      console.error('Error adding customer:', err);
-    });
+    .catch(console.error);
 });
 
-// Similar logic for Products:
+// ——— PRODUCT ———
 document.getElementById('loadProducts').addEventListener('click', () => {
-  fetch('/api/products')
-    .then(res => res.json())
-    .then(products => {
-      const listEl = document.getElementById('productList');
-      listEl.innerHTML = '';
-      products.forEach(prod => {
-        const item = document.createElement('li');
-        item.textContent = `${prod.product_id}: ${prod.name} ($${prod.price}) [Dept ${prod.department_id}]`;
-        listEl.appendChild(item);
+  fetch(`${API_ROOT}/api/product`)
+    .then(r => r.json())
+    .then(list => {
+      const ul = document.getElementById('productList');
+      ul.innerHTML = '';
+      list.forEach(p => {
+        const li = document.createElement('li');
+        li.textContent =
+          `${p.product_id}: ${p.name} — $${p.msrp}` +
+          ` (Sell By: ${p.sell_by_date || 'N/A'})` +
+          ` [Supp: ${p.supplier_id}, Dept: ${p.department_number}]`;
+        ul.appendChild(li);
       });
     })
-    .catch(err => console.error('Error loading products:', err));
+    .catch(console.error);
 });
 
-document.getElementById('productForm').addEventListener('submit', event => {
-  event.preventDefault();
-  const form = event.target;
-  const newProduct = {
-    name: form.name.value,
-    price: parseFloat(form.price.value),
-    department_id: parseInt(form.department_id.value)
+document.getElementById('productForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const f = e.target;
+  const body = {
+    name:              f.name.value,
+    msrp:              parseFloat(f.msrp.value),
+    sell_by_date:      f.sell_by_date.value || null,
+    supplier_id:       parseInt(f.supplier_id.value, 10),
+    department_number: parseInt(f.department_number.value, 10),
   };
-  fetch('/api/products', {
-    method: 'POST',
+  fetch(`${API_ROOT}/api/product`, {
+    method:  'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(newProduct)
+    body:    JSON.stringify(body),
   })
-    .then(res => res.json())
-    .then(createdProd => {
-      console.log('Product added:', createdProd);
-      form.reset();
-      document.getElementById('loadProducts').click();  // Refresh product list
+    .then(r => r.json())
+    .then(() => {
+      f.reset();
+      document.getElementById('loadProducts').click();
     })
-    .catch(err => console.error('Error adding product:', err));
+    .catch(console.error);
 });
 
