@@ -1,7 +1,6 @@
-/* Root of the live API */
 const API_ROOT = 'https://octsoc.diejor.tech';
 
-/* ---------- Utility ---------- */
+// simple DOM helpers
 const $ = id => document.getElementById(id);
 const listify = (container, rows, render) => {
   container.innerHTML = '';
@@ -12,136 +11,190 @@ const listify = (container, rows, render) => {
   });
 };
 
-/* =================================================
-   ==================  CUSTOMERS  ==================
-   ================================================= */
-$('loadCustomers').addEventListener('click', () => {
-  fetch(`${API_ROOT}/api/customer`)
-    .then(r => r.json())
-    .then(rows => listify($('customerList'), rows, c => {
+/**
+ * Universal fetch + render helper
+ * @param {string} endpoint  path after /api/
+ * @param {HTMLButtonElement} button
+ * @param {HTMLElement} listContainer
+ * @param {HTMLElement} statusElem
+ * @param {Function} renderFn  (row) => string
+ */
+async function fetchAndRender({ endpoint, button, listContainer, statusElem, renderFn }) {
+  const origText = button.textContent;
+  button.disabled = true;
+  button.textContent = button.dataset.loadingText;
+  statusElem.textContent = '';
+  listContainer.innerHTML = '';
+
+  try {
+    const res = await fetch(`${API_ROOT}/api/${endpoint}`);
+    if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+    const data = await res.json();
+    if (!Array.isArray(data) || data.length === 0) {
+      statusElem.textContent = 'No records found.';
+    } else {
+      listify(listContainer, data, renderFn);
+    }
+  } catch (err) {
+    console.error(err);
+    statusElem.textContent = `Error: ${err.message}`;
+  } finally {
+    button.disabled = false;
+    button.textContent = origText;
+  }
+}
+
+// wire up each section
+
+// Customers
+$('loadCustomers').addEventListener('click', () =>
+  fetchAndRender({
+    endpoint:      'customer',
+    button:        $('loadCustomers'),
+    listContainer: $('customerList'),
+    statusElem:    $('customerStatus'),
+    renderFn: c => {
       const mi = c.middle_initial ? ` ${c.middle_initial}.` : '';
       return `${c.membership_id}: ${c.first_name}${mi} ${c.last_name} [${c.membership_type || 'N/A'}]`;
-    }))
-    .catch(console.error);
-});
-
-$('customerForm').addEventListener('submit', e => {
-  e.preventDefault();
-  const f = e.target;
-  fetch(`${API_ROOT}/api/customer`, {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      first_name:      f.first_name.value,
-      middle_initial:  f.middle_initial.value || null,
-      last_name:       f.last_name.value,
-      membership_type: f.membership_type.value || null
-    }),
+    }
   })
-    .then(() => { f.reset(); $('loadCustomers').click(); })
-    .catch(console.error);
-});
-
-/* =================================================
-   ==================  PRODUCTS  ===================
-   ================================================= */
-$('loadProducts').addEventListener('click', () => {
-  fetch(`${API_ROOT}/api/product`)
-    .then(r => r.json())
-    .then(rows => listify($('productList'), rows, p =>
-      `${p.product_id}: ${p.name} — $${p.msrp} (Sell By: ${p.sell_by_date || 'N/A'}) [Supp: ${p.supplier_id}, Dept: ${p.department_number}]`
-    ))
-    .catch(console.error);
-});
-
-$('productForm').addEventListener('submit', e => {
+);
+$('customerForm').addEventListener('submit', async e => {
   e.preventDefault();
-  const f = e.target;
-  fetch(`${API_ROOT}/api/product`, {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      name:              f.name.value,
-      msrp:              parseFloat(f.msrp.value),
-      sell_by_date:      f.sell_by_date.value || null,
-      supplier_id:       parseInt(f.supplier_id.value, 10),
-      department_number: parseInt(f.department_number.value, 10)
-    }),
+  const btn = e.target.querySelector('button');
+  const orig = btn.textContent;
+  btn.disabled = true; btn.textContent = btn.dataset.loadingText;
+
+  const form = e.target;
+  try {
+    const payload = {
+      first_name:     form.first_name.value,
+      middle_initial: form.middle_initial.value || null,
+      last_name:      form.last_name.value,
+      membership_type: form.membership_type.value || null
+    };
+    const res = await fetch(`${API_ROOT}/api/customer`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+    form.reset();
+    $('loadCustomers').click();
+  } catch (err) {
+    alert(`Failed to add customer: ${err.message}`);
+    console.error(err);
+  } finally {
+    btn.disabled = false; btn.textContent = orig;
+  }
+});
+
+// Products
+$('loadProducts').addEventListener('click', () =>
+  fetchAndRender({
+    endpoint:      'product',
+    button:        $('loadProducts'),
+    listContainer: $('productList'),
+    statusElem:    $('productStatus'),
+    renderFn: p => `${p.product_id}: ${p.name} — $${p.msrp} (Sell-by ${p.sell_by_date || 'N/A'}) [Supp: ${p.supplier_id}, Dept: ${p.department_number}]`
   })
-    .then(() => { f.reset(); $('loadProducts').click(); })
-    .catch(console.error);
+);
+$('productForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const btn = e.target.querySelector('button');
+  const orig = btn.textContent;
+  btn.disabled = true; btn.textContent = btn.dataset.loadingText;
+
+  const form = e.target;
+  try {
+    const payload = {
+      name:              form.name.value,
+      msrp:              parseFloat(form.msrp.value),
+      sell_by_date:      form.sell_by_date.value || null,
+      supplier_id:       parseInt(form.supplier_id.value, 10),
+      department_number: parseInt(form.department_number.value, 10)
+    };
+    const res = await fetch(`${API_ROOT}/api/product`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+    form.reset();
+    $('loadProducts').click();
+  } catch (err) {
+    alert(`Failed to add product: ${err.message}`);
+    console.error(err);
+  } finally {
+    btn.disabled = false; btn.textContent = orig;
+  }
 });
 
-/* =================================================
-   ===================  STORES  ====================
-   ================================================= */
-$('loadStores').addEventListener('click', () => {
-  fetch(`${API_ROOT}/api/stores`)
-    .then(r => r.json())
-    .then(rows => {
-      listify($('storeList'), rows, s =>
-        `#${s.store_number} — ${s.city}, ${s.state}  (${s.department_count} depts)`
-      );
-      /* fill drop‑down for department lookup */
-      const sel = $('storeSelect');
-      sel.innerHTML = '<option hidden value="">Choose store…</option>';
-      rows.forEach(s => {
-        const opt = document.createElement('option');
-        opt.value = s.store_number;
-        opt.textContent = `#${s.store_number} – ${s.city}`;
-        sel.appendChild(opt);
-      });
-    })
-    .catch(console.error);
-});
-
-/* =================================================
-   ===========  DEPARTMENTS BY STORE  ==============
-   ================================================= */
-$('storeSelect').addEventListener('change', e => {
-  const id = e.target.value;
+// Stores & Departments
+$('loadStores').addEventListener('click', () =>
+  fetchAndRender({
+    endpoint:      'stores',
+    button:        $('loadStores'),
+    listContainer: $('storeList'),
+    statusElem:    $('storeStatus'),
+    renderFn: s => `#${s.store_number} — ${s.city}, ${s.state}  (${s.department_count} depts)`
+  }).then(() => {
+    // populate select after successful fetch
+    const sel = $('storeSelect');
+    sel.innerHTML = '<option hidden value="">Choose store…</option>';
+    document.querySelectorAll('#storeList li').forEach(li => {
+      // parse store_number from text
+      const num = li.textContent.match(/^#(\d+)/)[1];
+      const city = li.textContent.split('—')[1].trim().split(',')[0];
+      const opt = document.createElement('option');
+      opt.value = num;
+      opt.textContent = `#${num} – ${city}`;
+      sel.appendChild(opt);
+    });
+  })
+);
+$('storeSelect').addEventListener('change', () => {
+  const id = $('storeSelect').value;
   if (!id) return;
-  fetch(`${API_ROOT}/api/stores/${id}/departments`)
-    .then(r => r.json())
-    .then(rows => listify($('deptList'), rows, d =>
-      `${d.department_number}: ${d.name} (Mgr: ${d.manager || '—'})`
-    ))
-    .catch(console.error);
+  fetchAndRender({
+    endpoint:      `stores/${id}/departments`,
+    button:        $('loadStores'), // reuse store button just for loading state
+    listContainer: $('deptList'),
+    statusElem:    $('deptStatus'),
+    renderFn: d => `${d.department_number}: ${d.name} (Mgr: ${d.manager||'—'})`
+  });
 });
 
-/* =================================================
-   =================  EMPLOYEES  ===================
-   ================================================= */
-$('loadEmployees').addEventListener('click', () => {
-  fetch(`${API_ROOT}/api/employees`)
-    .then(r => r.json())
-    .then(rows => listify($('employeeList'), rows, e =>
-      `${e.employee_id}: ${e.employee}  →  ${e.manager || 'None'}`
-    ))
-    .catch(console.error);
-});
+// Employees
+$('loadEmployees').addEventListener('click', () =>
+  fetchAndRender({
+    endpoint:      'employees',
+    button:        $('loadEmployees'),
+    listContainer: $('employeeList'),
+    statusElem:    $('employeeStatus'),
+    renderFn: e => `${e.employee_id}: ${e.employee} → ${e.manager||'None'}`
+  })
+);
 
-/* =================================================
-   =================  SUPPLIERS  ===================
-   ================================================= */
-$('loadSuppliers').addEventListener('click', () => {
-  fetch(`${API_ROOT}/api/suppliers`)
-    .then(r => r.json())
-    .then(rows => listify($('supplierList'), rows, s =>
-      `${s.supplier_id}: ${s.name} – ${s.sku_count} SKUs`
-    ))
-    .catch(console.error);
-});
+// Suppliers
+$('loadSuppliers').addEventListener('click', () =>
+  fetchAndRender({
+    endpoint:      'suppliers',
+    button:        $('loadSuppliers'),
+    listContainer: $('supplierList'),
+    statusElem:    $('supplierStatus'),
+    renderFn: s => `${s.supplier_id}: ${s.name} – ${s.sku_count} SKUs`
+  })
+);
 
-/* =================================================
-   ===========  EXPIRING PRODUCTS (30d)  ===========
-   ================================================= */
-$('loadExpiring').addEventListener('click', () => {
-  fetch(`${API_ROOT}/api/products/expiring`)
-    .then(r => r.json())
-    .then(rows => listify($('expiringList'), rows, p =>
-      `${p.product_id}: ${p.name}  (Sell‑by ${p.sell_by}) – $${p.msrp}`
-    ))
-    .catch(console.error);
-});
+// Expiring Products
+$('loadExpiring').addEventListener('click', () =>
+  fetchAndRender({
+    endpoint:      'products/expiring',
+    button:        $('loadExpiring'),
+    listContainer: $('expiringList'),
+    statusElem:    $('expiringStatus'),
+    renderFn: p => `${p.product_id}: ${p.name} (Sell-by ${p.sell_by}) – $${p.msrp}`
+  })
+);
 
