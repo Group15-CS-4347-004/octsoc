@@ -1,142 +1,193 @@
 DROP DATABASE IF EXISTS OCTSOC;
-CREATE DATABASE IF NOT EXISTS OCTSOC;
+CREATE DATABASE IF NOT EXISTS OCTSOC
+  CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE OCTSOC;
 
--- Store Table
+-- ───────── STORE ───────────────────────────────────────────────
 DROP TABLE IF EXISTS STORE;
 CREATE TABLE STORE (
-  store_number INT PRIMARY KEY,
-  city VARCHAR(50) NOT NULL,
-  state CHAR(2) NOT NULL,
-  zipcode VARCHAR(5) NOT NULL,
-  street VARCHAR(50) NOT NULL
-);
+  store_number  INT           NOT NULL AUTO_INCREMENT,
+  city          VARCHAR(50)   NOT NULL,
+  state         CHAR(2)       NOT NULL,
+  zipcode      VARCHAR(10)   NOT NULL,
+  street        VARCHAR(50)   NOT NULL,
+  PRIMARY KEY (store_number)
+) ENGINE=InnoDB;
 
--- Employee Table
-DROP TABLE IF EXISTS EMPLOYEE;
-CREATE TABLE EMPLOYEE (
-  employee_id INT PRIMARY KEY,
-  first_name VARCHAR(50) NOT NULL,
-  middle_initial CHAR(1),
-  last_name VARCHAR(50) NOT NULL,
-  man_id INT NOT NULL,
-  FOREIGN KEY (man_id) REFERENCES employee(employee_id)
-);
-
--- Department Table
-DROP TABLE IF EXISTS DEPARTMENT;
-CREATE TABLE DEPARTMENT (
-  department_number INT NOT NULL,
-  store_number INT NOT NULL,
-  name VARCHAR(100) NOT NULL,
-  manager_id INT,
-  CONSTRAINT department_key PRIMARY KEY (department_number, store_number),
-  FOREIGN KEY (store_number) REFERENCES store(store_number),
-  FOREIGN KEY (manager_id) REFERENCES employee(employee_id)
-);
-
--- Supplier Table
+-- ───────── SUPPLIER ────────────────────────────────────────────
 DROP TABLE IF EXISTS SUPPLIER;
 CREATE TABLE SUPPLIER (
-  supplier_id INT PRIMARY KEY,
-  name VARCHAR(100) NOT NULL,
-  phone_no VARCHAR(20),
-  email VARCHAR(100)
-);
+  supplier_id   INT           NOT NULL AUTO_INCREMENT,
+  name          VARCHAR(100)  NOT NULL,
+  phone_no      VARCHAR(20),
+  email         VARCHAR(100),
+  PRIMARY KEY (supplier_id)
+) ENGINE=InnoDB;
 
--- Product Table
-DROP TABLE IF EXISTS PRODUCT;
-CREATE TABLE PRODUCT (
-  product_id INT PRIMARY KEY,
-  name VARCHAR(100) NOT NULL,
-  msrp DECIMAL(10,2),
-  sell_by VARCHAR(10)
-);
-
--- Customer Table
+-- ───────── CUSTOMER ────────────────────────────────────────────
 DROP TABLE IF EXISTS CUSTOMER;
 CREATE TABLE CUSTOMER (
-  membership_id INT PRIMARY KEY,
-  first_name VARCHAR(50) NOT NULL,
-  middle_initial CHAR(1),
-  last_name VARCHAR(50) NOT NULL,
-  membership_type VARCHAR(20),
-  city VARCHAR(50),
-  state CHAR(2),
-  zipcode INT,
-  street VARCHAR(20),
-  email VARCHAR(100),
-  phone_number VARCHAR(20),
-  shared_cardholder VARCHAR(100)
-);
+  membership_id    INT           NOT NULL AUTO_INCREMENT,
+  first_name       VARCHAR(50)   NOT NULL,
+  middle_initial   CHAR(1),
+  last_name        VARCHAR(50)   NOT NULL,
+  membership_type  VARCHAR(20),
+  city             VARCHAR(50),
+  state            CHAR(2),
+  zip_code         VARCHAR(10),
+  street           VARCHAR(50),
+  email            VARCHAR(100),
+  phone_number     VARCHAR(20),
+  shared_cardholder VARCHAR(100),
+  PRIMARY KEY (membership_id)
+) ENGINE=InnoDB;
 
--- Sales Transaction Table
+-- ───────── EMPLOYEE ────────────────────────────────────────────
+DROP TABLE IF EXISTS EMPLOYEE;
+CREATE TABLE EMPLOYEE (
+  employee_id    INT           NOT NULL AUTO_INCREMENT,
+  first_name     VARCHAR(50)   NOT NULL,
+  middle_initial CHAR(1),
+  last_name      VARCHAR(50)   NOT NULL,
+  man_id         INT           NULL,
+  PRIMARY KEY (employee_id),
+  CONSTRAINT fk_employee_manager
+    FOREIGN KEY (man_id)
+    REFERENCES EMPLOYEE(employee_id)
+    ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+-- ───────── DEPARTMENT ──────────────────────────────────────────
+DROP TABLE IF EXISTS DEPARTMENT;
+CREATE TABLE DEPARTMENT (
+  department_number INT         NOT NULL,
+  store_number      INT         NOT NULL,
+  name              VARCHAR(100)NOT NULL,
+  manager_id        INT         NULL,
+  CONSTRAINT pk_department 
+    PRIMARY KEY (department_number, store_number),
+  CONSTRAINT fk_department_store
+    FOREIGN KEY (store_number) 
+    REFERENCES STORE(store_number)
+    ON DELETE CASCADE,
+  CONSTRAINT fk_department_manager
+    FOREIGN KEY (manager_id)
+    REFERENCES EMPLOYEE(employee_id)
+    ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+-- ───────── PRODUCT ─────────────────────────────────────────────
+DROP TABLE IF EXISTS PRODUCT;
+CREATE TABLE PRODUCT (
+  product_id   INT          NOT NULL AUTO_INCREMENT,
+  name         VARCHAR(100) NOT NULL,
+  msrp         DECIMAL(10,2),
+  sell_by      VARCHAR(10),
+  PRIMARY KEY (product_id)
+) ENGINE=InnoDB;
+
+-- ───────── SALES ────────────────────────────────────────────────
 DROP TABLE IF EXISTS SALES;
 CREATE TABLE SALES (
-  transaction_id INT PRIMARY KEY,
-  date DATE,
-  time VARCHAR(8),
-  total_price DECIMAL(20,2)
-);
+  transaction_id INT         NOT NULL AUTO_INCREMENT,
+  date           DATE,
+  sold_at        TIME,
+  total_price    DECIMAL(20,2),
+  PRIMARY KEY (transaction_id)
+) ENGINE=InnoDB;
 
--- Shipment Table
+-- ───────── SHIPMENT ─────────────────────────────────────────────
 DROP TABLE IF EXISTS SHIPMENT;
 CREATE TABLE SHIPMENT (
-  shipment_id INT PRIMARY KEY,
-  arrival_date DATE
-);
+  shipment_id  INT         NOT NULL AUTO_INCREMENT,
+  arrival_date DATE,
+  PRIMARY KEY (shipment_id)
+) ENGINE=InnoDB;
 
--- Buys Table
+-- ───────── BUYS ────────────────────────────────────────────────
 DROP TABLE IF EXISTS BUYS;
 CREATE TABLE BUYS (
-	store_number INT,
-    supplier_id INT,
-    CONSTRAINT buys_key PRIMARY KEY (store_number, supplier_id),
-	FOREIGN KEY (store_number) REFERENCES store(store_number),
-	FOREIGN KEY (supplier_id) REFERENCES supplier(supplier_id)
-);
+  store_number  INT NOT NULL,
+  supplier_id   INT NOT NULL,
+  CONSTRAINT pk_buys PRIMARY KEY (store_number, supplier_id),
+  CONSTRAINT fk_buys_store
+    FOREIGN KEY (store_number)
+    REFERENCES STORE(store_number)
+    ON DELETE CASCADE,
+  CONSTRAINT fk_buys_supplier
+    FOREIGN KEY (supplier_id)
+    REFERENCES SUPPLIER(supplier_id)
+    ON DELETE CASCADE
+) ENGINE=InnoDB;
 
--- Supply Table
+-- ───────── SUPPLY ──────────────────────────────────────────────
 DROP TABLE IF EXISTS SUPPLY;
 CREATE TABLE SUPPLY (
-    supplier_id INT,
-    product_id INT,
-    CONSTRAINT supply_key PRIMARY KEY (supplier_id, product_id),
-	FOREIGN KEY (supplier_id) REFERENCES supplier(supplier_id),
-    FOREIGN KEY (product_id) REFERENCES product(product_id)
-);
+  supplier_id INT NOT NULL,
+  product_id  INT NOT NULL,
+  CONSTRAINT pk_supply PRIMARY KEY (supplier_id, product_id),
+  CONSTRAINT fk_supply_supplier
+    FOREIGN KEY (supplier_id)
+    REFERENCES SUPPLIER(supplier_id)
+    ON DELETE CASCADE,
+  CONSTRAINT fk_supply_product
+    FOREIGN KEY (product_id)
+    REFERENCES PRODUCT(product_id)
+    ON DELETE CASCADE
+) ENGINE=InnoDB;
 
--- Sends Table
+-- ───────── SENDS ───────────────────────────────────────────────
 DROP TABLE IF EXISTS SENDS;
 CREATE TABLE SENDS (
-    supplier_id INT,
-    shipment_id INT,
-    CONSTRAINT sends_key PRIMARY KEY (supplier_id, shipment_id),
-	FOREIGN KEY (supplier_id) REFERENCES supplier(supplier_id),
-    FOREIGN KEY (shipment_id) REFERENCES shipment(shipment_id)
-);
+  supplier_id INT NOT NULL,
+  shipment_id INT NOT NULL,
+  CONSTRAINT pk_sends PRIMARY KEY (supplier_id, shipment_id),
+  CONSTRAINT fk_sends_supplier
+    FOREIGN KEY (supplier_id)
+    REFERENCES SUPPLIER(supplier_id)
+    ON DELETE CASCADE,
+  CONSTRAINT fk_sends_shipment
+    FOREIGN KEY (shipment_id)
+    REFERENCES SHIPMENT(shipment_id)
+    ON DELETE CASCADE
+) ENGINE=InnoDB;
 
--- Sells Table
+-- ───────── SELLS ───────────────────────────────────────────────
 DROP TABLE IF EXISTS SELLS;
 CREATE TABLE SELLS (
-	store_number INT,
-    product_id INT,
-    CONSTRAINT sells_key PRIMARY KEY (store_number, product_id),
-	FOREIGN KEY (store_number) REFERENCES store(store_number),
-	FOREIGN KEY (product_id) REFERENCES product(product_id)
-);
+  store_number INT NOT NULL,
+  product_id   INT NOT NULL,
+  CONSTRAINT pk_sells PRIMARY KEY (store_number, product_id),
+  CONSTRAINT fk_sells_store
+    FOREIGN KEY (store_number)
+    REFERENCES STORE(store_number)
+    ON DELETE CASCADE,
+  CONSTRAINT fk_sells_product
+    FOREIGN KEY (product_id)
+    REFERENCES PRODUCT(product_id)
+    ON DELETE CASCADE
+) ENGINE=InnoDB;
 
--- Transaction Table
 DROP TABLE IF EXISTS SALES_TRANSACTION;
 CREATE TABLE SALES_TRANSACTION (
-	customer_id INT,
-	employee_id INT,
-    transaction_id INT,
-    CONSTRAINT transaction_key PRIMARY KEY (customer_id, employee_id, transaction_id),
-	FOREIGN KEY (customer_id) REFERENCES customer(membership_id),
-	FOREIGN KEY (employee_id) REFERENCES employee(employee_id),
-    FOREIGN KEY (transaction_id) REFERENCES sales(transaction_id)
-);
+  customer_id    INT NOT NULL,
+  employee_id    INT NOT NULL,
+  transaction_id INT NOT NULL,
+  CONSTRAINT pk_sales_transaction
+    PRIMARY KEY (customer_id, employee_id, transaction_id),
+  CONSTRAINT fk_salestrans_customer
+    FOREIGN KEY (customer_id)
+    REFERENCES CUSTOMER(membership_id)
+    ON DELETE CASCADE,
+  CONSTRAINT fk_salestrans_employee
+    FOREIGN KEY (employee_id)
+    REFERENCES EMPLOYEE(employee_id)
+    ON DELETE CASCADE,
+  CONSTRAINT fk_salestrans_sales
+    FOREIGN KEY (transaction_id)
+    REFERENCES SALES(transaction_id)
+    ON DELETE CASCADE
+) ENGINE=InnoDB;
 
 -- Insert Store Records
 INSERT INTO STORE(store_number,city,state,zipcode,street) VALUES (1,'Norfolk','VA',84536,'12 Cardinal Circle');
