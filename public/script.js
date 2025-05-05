@@ -91,9 +91,7 @@ $('loadProducts').addEventListener('click', () =>
       { key:'product_id' },
       { key:'name' },
       { key:'msrp' },
-      { key:'sell_by_date' },
-      { key:'supplier_id' },
-      { key:'department_number' }
+      { key:'sell_by_date' }
     ]
   })
 );
@@ -108,22 +106,20 @@ $('productForm').addEventListener('submit', async e => {
   const f = e.target;
   try {
     const body = {
-      name:              f.name.value,
-      msrp:              parseFloat(f.msrp.value),
-      sell_by_date:      f.sell_by_date.value || null,
-      supplier_id:       +f.supplier_id.value,
-      department_number: +f.department_number.value
+      name:         f.name.value,
+      msrp:         parseFloat(f.msrp.value),
+      sell_by_date: f.sell_by_date.value || null
     };
     const res = await fetch(`${API_ROOT}/api/product`, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(body)
+      method:  'POST',
+      headers: { 'Content-Type':'application/json' },
+      body:    JSON.stringify(body)
     });
     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     f.reset();
     $('loadProducts').click();
   } catch (err) {
-    alert(`Failed to add: ${err.message}`);
+    alert(`Failed to add product: ${err.message}`);
   } finally {
     btn.disabled = false; btn.textContent = orig;
   }

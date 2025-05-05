@@ -137,12 +137,11 @@ app.post('/api/customer', async (req, res) => {
 app.get('/api/product', async (_, res) => {
   try {
     const [rows] = await dbp.query(
-      `SELECT product_id,
-              name,
-              msrp,
-              sell_by   AS sell_by_date,
-              supplier_id,
-              department_number
+      `SELECT 
+         product_id,
+         name,
+         msrp,
+         sell_by   AS sell_by_date
        FROM \`PRODUCT\``
     );
     res.json(rows);
@@ -153,17 +152,19 @@ app.get('/api/product', async (_, res) => {
 });
 
 app.post('/api/product', async (req, res) => {
-  const { name, msrp, sell_by_date=null, supplier_id, department_number } = req.body;
+  const { name, msrp, sell_by_date = null } = req.body;
   try {
     const [result] = await dbp.query(
       `INSERT INTO \`PRODUCT\`(
-         name, msrp, sell_by, supplier_id, department_number
-       ) VALUES (?,?,?,?,?)`,
-      [name, msrp, sell_by_date, supplier_id, department_number]
+         name, msrp, sell_by
+       ) VALUES (?,?,?)`,
+      [name, msrp, sell_by_date]
     );
     res.status(201).json({
-      product_id: result.insertId,
-      name, msrp, sell_by_date, supplier_id, department_number
+      product_id:    result.insertId,
+      name,
+      msrp,
+      sell_by_date
     });
   } catch (e) {
     console.error('[/api/product POST] ERROR:', e);
