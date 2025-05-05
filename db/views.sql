@@ -46,7 +46,7 @@ SELECT
   sell_by
 FROM PRODUCT
 WHERE sell_by IS NOT NULL
-  AND STR_TO_DATE(sell_by, '%d/%m/%Y') BETWEEN CURRENT_DATE() 
+  AND STR_TO_DATE(sell_by, '%m/%d/%Y') BETWEEN CURRENT_DATE() 
   AND CURRENT_DATE() + INTERVAL 30 DAY
 ORDER BY sell_by;
 
