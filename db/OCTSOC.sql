@@ -34,7 +34,7 @@ CREATE TABLE CUSTOMER (
   membership_type  VARCHAR(20),
   city             VARCHAR(50),
   state            CHAR(2),
-  zip_code         VARCHAR(10),
+  zipcode         VARCHAR(10),
   street           VARCHAR(50),
   email            VARCHAR(100),
   phone_number     VARCHAR(20),
@@ -91,7 +91,7 @@ DROP TABLE IF EXISTS SALES;
 CREATE TABLE SALES (
   transaction_id INT         NOT NULL AUTO_INCREMENT,
   date           DATE,
-  sold_at        TIME,
+  time        	TIME,
   total_price    DECIMAL(20,2),
   PRIMARY KEY (transaction_id)
 ) ENGINE=InnoDB;
@@ -19804,6 +19804,7 @@ INSERT INTO SELLS(store_number,product_id) VALUES (21,20927);
 INSERT INTO SELLS(store_number,product_id) VALUES (150,08737);
 INSERT INTO SELLS(store_number,product_id) VALUES (41,83468);
 -- Insert Store_Transaction Records
+SET GLOBAL FOREIGN_KEY_CHECKS=0;
 INSERT INTO SALES_TRANSACTION(customer_id,employee_id,transaction_id) VALUES (881,843,198);
 INSERT INTO SALES_TRANSACTION(customer_id,employee_id,transaction_id) VALUES (280,918,953);
 INSERT INTO SALES_TRANSACTION(customer_id,employee_id,transaction_id) VALUES (308,904,235);
@@ -20804,3 +20805,4 @@ INSERT INTO SALES_TRANSACTION(customer_id,employee_id,transaction_id) VALUES (53
 INSERT INTO SALES_TRANSACTION(customer_id,employee_id,transaction_id) VALUES (314,614,901);
 INSERT INTO SALES_TRANSACTION(customer_id,employee_id,transaction_id) VALUES (672,425,835);
 INSERT INTO SALES_TRANSACTION(customer_id,employee_id,transaction_id) VALUES (330,951,813);
+SET GLOBAL FOREIGN_KEY_CHECKS=1;

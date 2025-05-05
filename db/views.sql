@@ -46,7 +46,8 @@ SELECT
   sell_by
 FROM PRODUCT
 WHERE sell_by IS NOT NULL
-  AND sell_by BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
+  AND STR_TO_DATE(sell_by, '%d/%m/%Y') BETWEEN CURRENT_DATE() 
+  AND CURRENT_DATE() + INTERVAL 30 DAY
 ORDER BY sell_by;
 
 -- Daily sales summary (last 30 days)
