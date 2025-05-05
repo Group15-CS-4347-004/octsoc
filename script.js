@@ -4,12 +4,6 @@ const $ = id => document.getElementById(id);
 /**
  * Fetch JSON from /api/⟨endpoint⟩, toggle loading state on ⟨button⟩,
  * write errors or “no records” to ⟨statusElem⟩, and fill ⟨tableBody⟩.
- * @param {object} opts
- *   - endpoint: string
- *   - button: HTMLButtonElement
- *   - statusElem: HTMLElement
- *   - tableBody: HTMLElement
- *   - columns: Array<{ key: string }>
  */
 async function fetchAndTable({ endpoint, button, statusElem, tableBody, columns }) {
   const origText = button.textContent;
@@ -69,11 +63,11 @@ $('customerForm').addEventListener('submit', async e => {
       first_name:     f.first_name.value,
       middle_initial: f.middle_initial.value || null,
       last_name:      f.last_name.value,
-      membership_type: f.membership_type.value || null
+      membership_type:f.membership_type.value || null
     };
     const res = await fetch(`${API_ROOT}/api/customer`, {
       method: 'POST',
-      headers: { 'Content-Type':'application/json' },
+      headers: {'Content-Type':'application/json'},
       body: JSON.stringify(body)
     });
     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
@@ -109,7 +103,7 @@ $('productForm').addEventListener('submit', async e => {
   e.preventDefault();
   const btn = e.target.querySelector('button');
   const orig = btn.textContent;
-  btn.disabled = true; btn.textContent = btn.dataset.loading-text;
+  btn.disabled = true; btn.textContent = btn.dataset.loadingText;
 
   const f = e.target;
   try {
@@ -121,8 +115,8 @@ $('productForm').addEventListener('submit', async e => {
       department_number: +f.department_number.value
     };
     const res = await fetch(`${API_ROOT}/api/product`, {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json' },
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
       body: JSON.stringify(body)
     });
     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
@@ -149,14 +143,13 @@ $('loadStores').addEventListener('click', () =>
       { key:'department_count' }
     ]
   }).then(() => {
-    // populate <select> after table loads
     const sel = $('storeSelect');
     sel.innerHTML = '<option hidden value="">Choose store…</option>';
     document.querySelectorAll('#storeTableBody tr').forEach(tr => {
-      const num = tr.children[0].textContent;
+      const num  = tr.children[0].textContent;
       const city = tr.children[1].textContent;
-      const opt = document.createElement('option');
-      opt.value = num;
+      const opt  = document.createElement('option');
+      opt.value   = num;
       opt.textContent = `#${num} – ${city}`;
       sel.appendChild(opt);
     });
